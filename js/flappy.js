@@ -7,7 +7,7 @@ const passoDeJogo = 5
 const posicaoCenario = cenario.getBoundingClientRect().x
 
 function voar() {
-    console.log('voando')
+    // console.log('voando')
     clearInterval(caindo)
     const velocidadeSubida = 30
     const passoDeSubida = 5
@@ -22,7 +22,7 @@ function voar() {
 }
 
 function cair() {
-    console.log('caindo')
+    // console.log('caindo')
     clearInterval(voando)
     const velocidadeQueda = 40
     const passoDeQueda = 5
@@ -106,15 +106,15 @@ function moverObstaculos() {
         
         const posicaoFlappy = flappy.getBoundingClientRect().x - flappy.clientWidth - obstaculo.clientWidth
         const meioDoCenario = flappy.getBoundingClientRect().x
-        
-        console.log('movimento', movimento)
 
         if (movimento < meioDoCenario && movimento > posicaoFlappy) {
             verificarColisao()
         }
 
-        if(movimento < posicaoFlappy) {
+        if(movimento < posicaoFlappy && obstaculo.hasAttribute('atual')) {
+            aumentarPontuacao()
             obstaculo.removeAttribute('atual')
+            console.log('Alterando atual')
             obstaculo.nextElementSibling.setAttribute('atual', true)
         }
 
@@ -126,31 +126,38 @@ function moverObstaculos() {
 }
 
 function verificarColisao() {
-    console.log('verificando colisao')
     const tuboSuperior = document.querySelector('[atual]').firstElementChild
     const tuboInferior = document.querySelector('[atual]').lastElementChild
 
     const coordenadasFlappy = flappy.getBoundingClientRect().y
     const coordenadasTuboSuperior = tuboSuperior.getBoundingClientRect().y + tuboSuperior.clientHeight //Considerar a parte de baixo do tubo. Logo, soma-se sua altura
     const coordenadasTuboInferior = tuboInferior.getBoundingClientRect().y
-    console.log('flappy', coordenadasFlappy)
-    console.log('superior', coordenadasTuboSuperior)
-    console.log('inferior', coordenadasTuboInferior)
-    if(coordenadasFlappy < coordenadasTuboSuperior || coordenadasFlappy > coordenadasTuboInferior) {
+
+    if(coordenadasFlappy < coordenadasTuboSuperior || coordenadasFlappy + flappy.clientHeight > coordenadasTuboInferior) {
         console.log('Colisão')
         clearInterval(rodando)
     }
 }
 
+
+function aumentarPontuacao() {
+    const contador = document.querySelector('.contador')
+    const pontuacaoAtual = Number(contador.innerHTML)
+    const novaPontuacao = pontuacaoAtual + 1
+    contador.innerHTML = `${novaPontuacao}`
+}
+
+
 function play() {
+    document.addEventListener('DOMContentLoaded', cair, false)
+    document.onkeydown = voar
+    document.onkeyup = cair
     criarObstáculo()
+    
     rodando = setInterval(() => {
         moverObstaculos()
         proximoObstaculo += passoDeJogo
     }, velocidadeDoJogo)
-    document.addEventListener('DOMContentLoaded', cair, false)
-    document.onkeydown = voar
-    document.onkeyup = cair
 }
 
 play()
